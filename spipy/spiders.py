@@ -72,6 +72,10 @@ class Spider():
             self.queueLock.acquire()
             self.item_queue.put(each_url)
             self.queueLock.release()
+        while self.item_queue.empty() == False:
+            pass
+        sleep(5)
+        self.logger.critical("爬取完毕")
         while (True):
             sleep(1)
             except_info = self.except_queue.get()
