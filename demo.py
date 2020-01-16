@@ -21,20 +21,20 @@ from spipy import Spider
 
 def gen_url():
     for each_id in range(100):
-        yield "https://www.biliob.com/api/video/{}".format(each_id)
+        yield "https://www.bilibili.com/video/av{}".format(each_id)
 
 
 def parse(response, key=None):
-    return response
+    return response.xpath('//meta[@name="title"]/@content')[0]
 
 
 def save(item):
-    pass
+    print(item)
     # print(item.xpath('//meta[@name="title"]/@content')[0])
 
 
 # s = Spider()
-s = Spider(gen_url=gen_url, name="DEMO")
+s = Spider(gen_url, parse, save, name="DEMO")
 # s.assemble(gen_url, parse, save)
 s.run()
 
