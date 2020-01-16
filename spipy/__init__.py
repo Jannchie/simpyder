@@ -1,1 +1,0 @@
-from .spiders import Spider
