@@ -1,0 +1,9 @@
+README.md
+setup.py
+simpyder/__init__.py
+simpyder/spiders.py
+simpyder.egg-info/PKG-INFO
+simpyder.egg-info/SOURCES.txt
+simpyder.egg-info/dependency_links.txt
+simpyder.egg-info/requires.txt
+simpyder.egg-info/top_level.txt

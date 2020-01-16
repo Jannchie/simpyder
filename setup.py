@@ -1,13 +1,15 @@
-
+# coding=utf-8
 from setuptools import setup, find_packages
-
+with open('./README.md', 'r', encoding="utf-8") as fh:
+    long_description = fh.read()
 setup(
-    name='spipy',
+    name='simpyder',
     version='0.0.1',
     description=(
-        '分布式多线程通用爬虫'
+        'Distributed multithreading universal crawler'
     ),
-    long_description=open('README.md').read(),
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author='Jannchie',
     author_email='jannchie@gmail.com',
     maintainer='Jannchie',
@@ -15,17 +17,15 @@ setup(
     license='MIT License',
     packages=find_packages(),
     platforms=["all"],
-    url='https://github.com/Jannchie/spipy',
+    url='https://github.com/Jannchie/simpyder',
     classifiers=[
-        'Development Status :: 4 - Beta',
-        'Operating System :: OS Independent',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Software Development :: Libraries'
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
+    python_requires='>=3.6',
+    install_requires=[
+        'requests==2.22.0',
+        'lxml==4.3.4',
+    ]
 )
