@@ -1,22 +1,6 @@
-from spipy import Spider
+# coding=utf-8
 
-
-# class Demo(Spider):
-#     def __init__(self):
-#         super().__init__()
-#         self.NAME = "demo"
-#     pass
-
-#     def gen_url(self):
-#         for each_id in range(100):
-#             yield "https://www.bilibili.com/video/av{}".format(each_id)
-
-#     def parse(self, response, key=None):
-#         return response
-
-#     def save(self, item):
-#         pass
-#         print(HTML(item.text).xpath('//meta[@name="title"]/@content')[0])
+from simpyder import Spider
 
 
 def gen_url():
@@ -30,12 +14,11 @@ def parse(response, key=None):
 
 def save(item):
     print(item)
-    # print(item.xpath('//meta[@name="title"]/@content')[0])
 
 
-# s = Spider()
-s = Spider(gen_url, parse, save, name="DEMO")
-# s.assemble(gen_url, parse, save)
-s.run()
+s1 = Spider(gen_url, parse, save, name="DEMO")
+s1.run()
 
-# Demo()
+s2 = Spider()
+s2.assemble(gen_url, parse, save)
+s2.run()
