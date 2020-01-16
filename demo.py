@@ -1,6 +1,4 @@
 from spipy import Spider
-import requests
-from lxml.etree import HTML
 
 
 # class Demo(Spider):
@@ -23,7 +21,7 @@ from lxml.etree import HTML
 
 def gen_url():
     for each_id in range(100):
-        yield "https://www.bilibili.com/video/av{}".format(each_id)
+        yield "https://www.biliob.com/api/video/{}".format(each_id)
 
 
 def parse(response, key=None):
@@ -32,11 +30,11 @@ def parse(response, key=None):
 
 def save(item):
     pass
-    print(HTML(item.text).xpath('//meta[@name="title"]/@content')[0])
+    # print(item.xpath('//meta[@name="title"]/@content')[0])
 
 
 # s = Spider()
-s = Spider(gen_url, parse, save)
+s = Spider(gen_url=gen_url, name="DEMO")
 # s.assemble(gen_url, parse, save)
 s.run()
 

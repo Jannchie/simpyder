@@ -3,6 +3,7 @@ import threading
 import queue
 import logging
 import requests
+from lxml.etree import HTML
 headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0 Win64 x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36'}
 
@@ -13,7 +14,7 @@ def get_logger(name):
     ch.setFormatter(logging.Formatter(
         '[%(asctime)s] %(levelname)s @ %(name)s: %(message)s'))
     logger.setLevel(logging.DEBUG)
-    ch.setLevel(logging.INFO)
+    ch.setLevel(logging.DEBUG)
     logger.addHandler(ch)
     logger.critical("启动线程 {}".format(name))
     return logger
@@ -27,15 +28,17 @@ class Spider():
 
     def get_response(self, url):
         response = requests.get(url, headers=headers)
+        if 'html' in response.headers['content-type']:
+            response.xpath = HTML(response.text).xpath
         return response
 
-    def parse(self, response, key=None):
-        self.except_queue.put('未实现方法: parse(response, key)')
-        return None
+    def parse(response, key=None):
+        self.logger.critical('未实现方法: parse(response, key)，将直接返回Response对象')
+        return response
 
     def save(self, item):
-        self.except_queue.put('未实现方法: save(item)')
-        return None
+        self.logger.critical('未实现方法: save(item)，将直接打印爬取内容。')
+        print(item)
 
     def assemble(self, gen_url=None, parse=None, save=None):
         if gen_url != None:
@@ -46,19 +49,20 @@ class Spider():
             self.save = save
         pass
 
-    def __init__(self, gen_url=None, parse=None, save=None):
+    def __init__(self, gen_url=None, parse=None, save=None, name="My Spider"):
+        self.name = name
         self.assemble(gen_url, parse, save)
         self.QUEUE_LEN = 1000
-        self.NAME = "NAMELESS"
         self.PARSE_THREAD_NUMER = 8
         self.item_queue = queue.Queue(self.QUEUE_LEN)
         self.except_queue = queue.Queue(1)
         self.queueLock = threading.Lock()
         self.threads = []
+        self.logger = get_logger("{} - 主线程".format(name))
 
     def run(self):
         for i in range(self.PARSE_THREAD_NUMER):
-            self.threads.append(self.ParseThread(self.NAME + ' ' + str(i), self.item_queue, self.queueLock,
+            self.threads.append(self.ParseThread('{} - 子线程 - No.{}'.format(self.name, i), self.item_queue, self.queueLock,
                                                  self.get_response, self.parse, self.save, self.except_queue))
         for each_thread in self.threads:
             each_thread.setDaemon(True)
@@ -105,7 +109,10 @@ class Spider():
                     self.logger.debug("开始爬取 {}".format(url))
 
                     response = self.get_response(url)
-                    item = self.parse(response, url)
+                    if 'json' in response.headers['content-type']:
+                        item = response.json()
+                    else:
+                        item = self.parse(response, url)
                     self.logger.debug(item)
                     self.save(item)
             except NotImplementedError as e:
