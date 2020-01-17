@@ -72,11 +72,13 @@ class Spider():
         for each_url in url_gener:
             self.queueLock.acquire()
             self.item_queue.put(each_url)
+            self.logger.critical("开始爬取 {}".format(url))
             self.queueLock.release()
         while self.item_queue.empty() == False:
             pass
         sleep(5)
         self.logger.critical("爬取完毕")
+        quit()
         while (True):
             sleep(1)
             except_info = self.except_queue.get()
@@ -111,8 +113,6 @@ class Spider():
                     if url == None:
                         sleep(1)
                         continue
-                    self.logger.debug("开始爬取 {}".format(url))
-
                     response = self.get_response(url)
                     if 'json' in response.headers['content-type']:
                         item = response.json()
