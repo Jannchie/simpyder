@@ -8,7 +8,7 @@ def gen_url():
         yield "https://www.bilibili.com/video/av{}".format(each_id)
 
 
-def parse(response, key=None):
+def parse(response):
     return response.xpath('//meta[@name="title"]/@content')[0]
 
 
@@ -20,6 +20,6 @@ def save(item):
 s1 = Spider(gen_url, parse, save, name="DEMO")
 s1.run()
 
-s2 = Spider()
-s2.assemble(gen_url, parse, save)
-s2.run()
+# s2 = Spider(name="DEMO")
+# s2.assemble(gen_url, parse, save)
+# s2.run()

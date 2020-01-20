@@ -12,9 +12,14 @@ Simpyder - 轻量级多线程Python爬虫
 
 ### 下载
 
-```powershell
+```bash
 #使用pip3
 pip3 install simpyder --user
+```
+
+```bash
+# 更新包
+pip3 install simpyder --upgrade
 ```
 
 ### 编码
@@ -38,7 +43,7 @@ def gen_url():
 该函数需要返回一个对象，作为处理结果。
 
 ``` python
-def parse(response, key=None):
+def parse(response):
     return response.xpath('//meta[@name="title"]/@content')[0]
 ```
 

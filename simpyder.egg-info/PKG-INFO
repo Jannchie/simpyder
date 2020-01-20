@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: simpyder
-Version: 0.0.3
+Version: 0.0.4
 Summary: Distributed multithreading universal crawler
 Home-page: https://github.com/Jannchie/simpyder
 Author: Jannchie
@@ -22,9 +22,14 @@ Description: # Simpyder - **Si**mple **M**ultithreaded **Py**thon Spi**der**
         
         ### 下载
         
-        ```powershell
+        ```bash
         #使用pip3
         pip3 install simpyder --user
+        ```
+        
+        ```bash
+        # 更新包
+        pip3 install simpyder --upgrade
         ```
         
         ### 编码
@@ -48,7 +53,7 @@ Description: # Simpyder - **Si**mple **M**ultithreaded **Py**thon Spi**der**
         该函数需要返回一个对象，作为处理结果。
         
         ``` python
-        def parse(response, key=None):
+        def parse(response):
             return response.xpath('//meta[@name="title"]/@content')[0]
         ```
         

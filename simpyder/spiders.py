@@ -18,7 +18,7 @@ def get_logger(name, level='INFO'):
     logger.setLevel(level)
     ch.setLevel(level)
     logger.addHandler(ch)
-    logger.critical("启动线程 {}".format(name))
+    logger.critical("线程启动")
     return logger
 
 
@@ -34,8 +34,8 @@ class Spider():
             response.xpath = HTML(response.text).xpath
         return response
 
-    def parse(response, key=None):
-        self.logger.critical('未实现方法: parse(response, key)，将直接返回Response对象')
+    def parse(response):
+        self.logger.critical('未实现方法: parse(response)，将直接返回Response对象')
         return response
 
     def save(self, item):
@@ -73,7 +73,7 @@ class Spider():
         self.logger = get_logger("{} - 主线程".format(name))
 
     def get_info(self):
-        log = get_logger("{} - 子线程 - OUTPUT".format(self.name), 'INFO')
+        log = get_logger("{} - 子线程 - INFO".format(self.name), 'INFO')
         history = []
         interval = 5
         while True:
@@ -85,7 +85,7 @@ class Spider():
                 delta = (history[-1][1] - history[0][1]) * 60 / \
                     (history[-1][0] - history[0][0]).total_seconds()
                 log.info(
-                    "正在爬取第{}个链接，({} /min)".format(self.meta['count'], int(delta)))
+                    "正在爬取第 {} 个链接，({}/min)".format(self.meta['count'], int(delta)))
             sleep(1)
 
     def run(self):
@@ -126,6 +126,7 @@ class Spider():
             pass
             sleep(1)
         self.logger.critical("爬取完毕")
+        self.logger.critical("合计爬取项目数：{}".format(meta["count"]))
 
     class ParseThread(threading.Thread):
         def __init__(self, name, url_queue, queueLock, get_response, parse, save, except_queue, item_queue, meta):
@@ -157,7 +158,7 @@ class Spider():
                     self.logger.debug("开始爬取 {}".format(url))
 
                     response = self.get_response(url)
-                    item = self.parse(response, url)
+                    item = self.parse(response)
                     self.item_queue.put(item)
 
                     datetime.timedelta(1)
