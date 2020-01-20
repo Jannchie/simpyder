@@ -130,3 +130,6 @@ dmypy.json
 *.pyc
 /dist
 /build
+/demo/simpyder
+/demo/bilispider.py
+

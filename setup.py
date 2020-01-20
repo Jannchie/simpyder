@@ -4,7 +4,7 @@ with open('./README.md', 'r', encoding="utf-8") as fh:
     long_description = fh.read()
 setup(
     name='simpyder',
-    version='0.0.1',
+    version='0.0.3',
     description=(
         'Distributed multithreading universal crawler'
     ),
