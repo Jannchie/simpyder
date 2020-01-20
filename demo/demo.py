@@ -13,7 +13,8 @@ def parse(response, key=None):
 
 
 def save(item):
-    print(item)
+    # print(item)
+    pass
 
 
 s1 = Spider(gen_url, parse, save, name="DEMO")
