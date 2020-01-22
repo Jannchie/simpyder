@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: simpyder
-Version: 0.0.4
+Version: 0.0.5a0
 Summary: Distributed multithreading universal crawler
 Home-page: https://github.com/Jannchie/simpyder
 Author: Jannchie
@@ -98,5 +98,5 @@ Platform: all
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.6
+Requires-Python: >=3.4
 Description-Content-Type: text/markdown
