@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from simpyder import Spider
+from simpyder.spiders import Spider
 
 
 def gen_url():
