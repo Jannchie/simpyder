@@ -42,14 +42,14 @@ class Spider():
             else:
                 sleep(0.1)
 
-    def assemble(self, gen_url=None, parse=None, save=None, config=SimpyderConfig()):
+    def assemble(self, gen_url=None, parse=None, save=None, config: SimpyderConfig = SimpyderConfig()):
         if gen_url != None:
             self.gen_url = gen_url
         if parse != None:
             self.parse = parse
         if save != None:
             self.save = save
-        pass
+        self.set_config(config)
 
     def set_config(self, config: SimpyderConfig):
         if config.HEADERS == None:
@@ -57,7 +57,6 @@ class Spider():
                             'User-Agent': config.USER_AGENT}
         else:
             self.headers = config.HEADERS
-        self.name = config.NAME
         self.PARSE_THREAD_NUMER = config.PARSE_THREAD_NUMER
 
     def __init__(self, gen_url=None, parse=None, save=None, config=SimpyderConfig(), name="Simpyder"):
@@ -92,6 +91,16 @@ class Spider():
             sleep(1)
 
     def run(self):
+        print("""
+=================================================
+_____ _                           __         
+/ ___/(_)___ ___  ____  __  ______/ /__  _____
+\__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
+___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
+/____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
+                /_/    /____/                   
+=================================================
+        """)
         self.logger.critical("Simpyder ver.{}".format(__VERSION__))
         self.logger.critical("启动爬虫任务")
         meta = {'link_count': 0, 'item_count': 0}
