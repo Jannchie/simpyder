@@ -83,3 +83,22 @@ s.assemble(gen_url, parse, save, name="DEMO") # 先创建爬虫对象，再装�
 ``` python
 s.run()
 ```
+
+### 你也可以配置进行一些简单的配置
+
+``` python
+from simpyder import SimpyderConfig
+sc = SimpyderConfig
+sc.COOKIES = "example:value"
+sc.USER_AGENT = "my user agent"
+s.assemble(gen_url=gen_url, parse=parse, save=save, name="DEMO",config=sc)
+```
+
+## 示例程序
+
+参见[B站视频标题爬虫](./demo/demo.py)
+
+---
+
+- 该项目由[@Jannchie](https://github.com/Jannchie)维护
+- 你可以通过邮箱[jannchie@gmail.com](jannchie@gmail.com)进行联系
