@@ -56,7 +56,7 @@ class Spider():
 
     def __apply_config(self):
         if self.config.HEADERS == None:
-            self.headers = {'cookies': self.config.COOKIES,
+            self.headers = {'cookie': self.config.COOKIE,
                             'User-Agent': self.config.USER_AGENT}
         else:
             self.headers = self.config.HEADERS
@@ -67,7 +67,7 @@ class Spider():
         else:
             self.logger.critical(
                 "使用User-Agent：{}...".format(self.config.USER_AGENT[:30]))
-        self.logger.critical("使用cookies：{}".format(self.config.COOKIES))
+        self.logger.critical("使用COOKIE：{}".format(self.config.COOKIE))
         self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
 
     def __init__(self, gen_url=None, parse=None, save=None, config=SimpyderConfig(), name="Simpyder"):

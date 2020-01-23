@@ -1,3 +1,3 @@
-from .utils import FAKE_UA
-from .spiders import Spider
-from .config import SimpyderConfig
+from simpyder.utils import FAKE_UA
+from simpyder.spiders import Spider
+from simpyder.config import SimpyderConfig

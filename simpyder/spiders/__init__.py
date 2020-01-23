@@ -1,1 +1,1 @@
-from .spiders import Spider
+from simpyder.spiders import Spider
