@@ -10,7 +10,7 @@ import datetime
 from simpyder.config import SimpyderConfig
 
 from simpyder.utils import _get_logger
-from simpyder.VERSION import __VERSION__
+from simpyder.__version__ import __VERSION__
 
 
 class Spider():
@@ -52,16 +52,29 @@ class Spider():
         self.set_config(config)
 
     def set_config(self, config: SimpyderConfig):
-        if config.HEADERS == None:
-            self.headers = {'cookies': config.COOKIES,
-                            'User-Agent': config.USER_AGENT}
+        self.config = config
+
+    def __apply_config(self):
+        if self.config.HEADERS == None:
+            self.headers = {'cookies': self.config.COOKIES,
+                            'User-Agent': self.config.USER_AGENT}
         else:
-            self.headers = config.HEADERS
-        self.PARSE_THREAD_NUMER = config.PARSE_THREAD_NUMER
+            self.headers = self.config.HEADERS
+        self.PARSE_THREAD_NUMER = self.config.PARSE_THREAD_NUMER
+        if (len(self.config.USER_AGENT) < 30):
+            self.logger.critical(
+                "使用User-Agent：{}".format(self.config.USER_AGENT))
+        else:
+            self.logger.critical(
+                "使用User-Agent：{}...".format(self.config.USER_AGENT[:30]))
+        self.logger.critical("使用cookies：{}".format(self.config.COOKIES))
+        self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
 
     def __init__(self, gen_url=None, parse=None, save=None, config=SimpyderConfig(), name="Simpyder"):
+        self.logger = _get_logger("{} - 主线程".format(name))
         self.assemble(gen_url, parse, save)
-        self.set_config(config)
+        self.config = config
+
         self.QUEUE_LEN = 1000
         self.url_queue = queue.Queue(self.QUEUE_LEN)
         self.item_queue = queue.Queue(self.QUEUE_LEN)
@@ -69,7 +82,6 @@ class Spider():
         self.queueLock = threading.Lock()
         self.threads = []
         self.name = name
-        self.logger = _get_logger("{} - 主线程".format(name))
 
     def __get_info(self):
         log = _get_logger("{} - 子线程 - INFO".format(self.name), 'INFO')
@@ -91,16 +103,20 @@ class Spider():
             sleep(1)
 
     def run(self):
+
+        self.__apply_config()
+
         print("""
-=================================================
-_____ _                           __         
-/ ___/(_)___ ___  ____  __  ______/ /__  _____
-\__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
-___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
-/____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
-                /_/    /____/                   
-=================================================
-        """)
+=======================================================
+       _____ _                           __         
+      / ___/(_)___ ___  ____  __  ______/ /__  _____
+      \__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
+     ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
+    /____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
+                    /_/    /____/   version: {}      
+=======================================================
+        """ .format(__VERSION__))
+
         self.logger.critical("Simpyder ver.{}".format(__VERSION__))
         self.logger.critical("启动爬虫任务")
         meta = {'link_count': 0, 'item_count': 0}

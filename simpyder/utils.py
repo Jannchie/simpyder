@@ -1,6 +1,6 @@
 import logging
 from os.path import dirname, join
-from .VERSION import __VERSION__
+from .__version__ import __VERSION__
 DEFAULT_UA = 'Simpyder {}'.format(__VERSION__)
 FAKE_UA = 'Mozilla/5.0 (Windows NT 10.0 Win64 x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36'
 
