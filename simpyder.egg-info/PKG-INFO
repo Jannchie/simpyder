@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: simpyder
-Version: 0.0.5a1
+Version: 0.0.5a2
 Summary: Distributed multithreading universal crawler
 Home-page: https://github.com/Jannchie/simpyder
 Author: Jannchie
@@ -93,6 +93,25 @@ Description: # Simpyder - **Si**mple **M**ultithreaded **Py**thon Spi**der**
         ``` python
         s.run()
         ```
+        
+        ### 你也可以配置进行一些简单的配置
+        
+        ``` python
+        from simpyder import SimpyderConfig
+        sc = SimpyderConfig
+        sc.COOKIES = "example:value"
+        sc.USER_AGENT = "my user agent"
+        s.assemble(gen_url=gen_url, parse=parse, save=save, name="DEMO",config=sc)
+        ```
+        
+        ## 示例程序
+        
+        参见[B站视频标题爬虫](./demo/demo.py)
+        
+        ---
+        
+        - 该项目由[@Jannchie](https://github.com/Jannchie)维护
+        - 你可以通过邮箱[jannchie@gmail.com](jannchie@gmail.com)进行联系
         
 Platform: all
 Classifier: Programming Language :: Python :: 3

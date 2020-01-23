@@ -1,7 +1,7 @@
 README.md
 setup.py
-simpyder/VERSION.py
-simpyder/__init__ .py
+simpyder/__init__.py
+simpyder/__version__.py
 simpyder/config.py
 simpyder/utils.py
 simpyder.egg-info/PKG-INFO
