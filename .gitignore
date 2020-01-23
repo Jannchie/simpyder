@@ -133,3 +133,4 @@ dmypy.json
 /demo/simpyder
 /demo/bilispider.py
 
+.vscode/settings.json

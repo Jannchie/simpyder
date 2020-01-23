@@ -1,8 +1,8 @@
 # coding=utf-8
-from setuptools import setup
+from setuptools import setup, find_packages
 from os.path import dirname, join
-from simpyder.VERSION import __VERSION__
-
+from simpyder.__version__ import __VERSION__
+print(find_packages())
 with open('./README.md', 'r', encoding="utf-8") as fh:
     long_description = fh.read()
 setup(
@@ -19,7 +19,7 @@ setup(
     maintainer='Jannchie',
     maintainer_email='jannchie@gmail.com',
     license='MIT License',
-    packages=['simpyder', 'simpyder.spiders'],
+    packages=find_packages(exclude=('demo', 'demo.*')),
     platforms=["all"],
     url='https://github.com/Jannchie/simpyder',
     classifiers=[
