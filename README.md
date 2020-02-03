@@ -28,7 +28,7 @@ pip3 install simpyder --upgrade
 
 #### 链接获取
 
-第一个函数用于产生链接。注意我们使用`yield`关键字而不是`return`。
+我们需要一个定义一个[生成器](https://docs.python.org/zh-cn/3/c-api/gen.html)，用于产生链接。
 
 ``` python
 def gen_url():
@@ -38,7 +38,7 @@ def gen_url():
 
 #### 链接解析
 
-第二个函数用于解析链接。其中第一个参数Response对象，也就是上述函数对应URL的访问结果。
+我们需要定义一个解析链接的函数。其中第一个参数是Response对象，也就是上述函数对应URL的访问结果。
 
 该函数需要返回一个对象，作为处理结果。
 
@@ -49,7 +49,7 @@ def parse(response):
 
 #### 数据导出
 
-上面函数的处理结果将在这个函数中统一被导出。
+上面函数的处理结果将在这个函数中统一被导出。下列例子为直接在控制台中打印导出结果。
 
 ``` python
 def save(item):
