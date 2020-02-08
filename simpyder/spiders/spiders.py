@@ -4,6 +4,7 @@ import threading
 import queue
 import logging
 import requests
+from requests.adapters import HTTPAdapter
 from lxml.etree import HTML
 import datetime
 
@@ -74,12 +75,21 @@ class Spider():
     self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
 
   def get(self, url):
-    return requests.get(url, headers=self.headers)
+    return self.session.get(url, headers=self.headers)
 
   def __init__(self, name="Simpyder", gen_url=None, parse=None, save=None, config=SimpyderConfig()):
+    # 配置Session，复用TCP连接
+    self.session = requests.session()
+    self.session.mount('http://', HTTPAdapter(max_retries=3))
+    self.session.mount('https://', HTTPAdapter(max_retries=3))
+    
+    # 载入配置
     self.config = config
 
+    # 载入主线程日志记录
     self.logger = _get_logger("{} - 主线程".format(name), self.config.LOG_LEVEL)
+
+    # 构造函数组装
     self.assemble(gen_url, parse, save)
 
     self.QUEUE_LEN = 1000
@@ -205,4 +215,4 @@ class Spider():
           self.logger.error(e)
           return
         except Exception as e:
-          self.logger.error(e)
+          self.logger.exception(e)

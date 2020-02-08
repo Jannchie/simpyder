@@ -22,9 +22,10 @@ def save(item):
   pass
 
 
-s1 = Spider(gen_url, parse, save, name="DEMO")
-sc = SimpyderConfig
-sc.COOKIES = "example:value"
-sc.USER_AGENT = "my user agent"
-s1.assemble(gen_url=gen_url, parse=parse, save=save, config=sc)
-s1.run()
+if __name__ == "__main__":
+  s1 = Spider("DEMO", gen_url, parse, save)
+  sc = SimpyderConfig()
+  sc.COOKIES = "example:value"
+  sc.USER_AGENT = "my user agent"
+  s1.assemble(gen_url=gen_url, parse=parse, save=save, config=sc)
+  s1.run()
