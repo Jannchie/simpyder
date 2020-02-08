@@ -32,6 +32,7 @@ class Spider():
     def save(self, item):
         self.logger.critical('未实现方法: save(item)，将直接打印爬取内容。')
         print(item)
+        return item
 
     def __run_save(self):
         logger = _get_logger("{} - 子线程 - SAVE".format(self.name), 'INFO')
@@ -70,7 +71,7 @@ class Spider():
         self.logger.critical("使用COOKIE：{}".format(self.config.COOKIE))
         self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
 
-    def __init__(self, gen_url=None, parse=None, save=None, config=SimpyderConfig(), name="Simpyder"):
+    def __init__(self, name="Simpyder", gen_url=None, parse=None, save=None, config=SimpyderConfig()):
         self.logger = _get_logger("{} - 主线程".format(name))
         self.assemble(gen_url, parse, save)
         self.config = config
@@ -103,19 +104,17 @@ class Spider():
             sleep(1)
 
     def run(self):
-
-        self.__apply_config()
-
         print("""
-=======================================================
-       _____ _                           __         
-      / ___/(_)___ ___  ____  __  ______/ /__  _____
-      \__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
-     ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
-    /____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
-                    /_/    /____/   version: {}      
-=======================================================
+            =======================================================
+                   _____ _                           __         
+                  / ___/(_)___ ___  ____  __  ______/ /__  _____
+                  \__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
+                 ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
+                /____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
+                                /_/    /____/   version: {}      
+            =======================================================
         """ .format(__VERSION__))
+        self.__apply_config()
 
         self.logger.critical("Simpyder ver.{}".format(__VERSION__))
         self.logger.critical("启动爬虫任务")
@@ -148,7 +147,7 @@ class Spider():
         while self.url_queue.empty() == False:
             if self.except_queue.empty() == False:
                 except_info = self.except_queue.get()
-                self.logger = _get_logger(self.NAME)
+                self.logger = _get_logger(self.name)
                 self.logger.error(except_info)
                 # for each_thread in self.threads:
                 #     each_thread.join()
