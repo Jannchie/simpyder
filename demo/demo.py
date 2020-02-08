@@ -23,9 +23,9 @@ def save(item):
 
 
 if __name__ == "__main__":
-  s1 = Spider("DEMO", gen_url, parse, save)
+  s1 = Spider("BILIBILI TITLE SPIDER", gen_url, parse, save)
   sc = SimpyderConfig()
-  sc.COOKIES = "example:value"
+  sc.COOKIES = "example:value;"
   sc.USER_AGENT = "my user agent"
   s1.assemble(gen_url=gen_url, parse=parse, save=save, config=sc)
   s1.run()
