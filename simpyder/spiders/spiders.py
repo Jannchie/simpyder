@@ -72,11 +72,13 @@ class Spider():
           "使用User-Agent：{}...".format(self.config.USER_AGENT[:30]))
     self.logger.critical("使用COOKIE：{}".format(self.config.COOKIE))
     self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
+
   def get(self, url):
     return requests.get(url, headers=self.headers)
+
   def __init__(self, name="Simpyder", gen_url=None, parse=None, save=None, config=SimpyderConfig()):
     self.config = config
-    
+
     self.logger = _get_logger("{} - 主线程".format(name), self.config.LOG_LEVEL)
     self.assemble(gen_url, parse, save)
 
@@ -110,14 +112,14 @@ class Spider():
 
   def run(self):
     print("""
-            =======================================================
-                   _____ _                           __         
-                  / ___/(_)___ ___  ____  __  ______/ /__  _____
-                  \__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
-                 ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
-                /____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
-                                /_/    /____/   version: {}      
-            =======================================================
+       _____ _                           __         
+      / ___/(_)___ ___  ____  __  ______/ /__  _____
+      \__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
+     ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
+    /____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/     
+                    /_/    /____/   version: {}      
+
+
         """ .format(__VERSION__))
     self.__apply_config()
 
