@@ -9,17 +9,17 @@ from simpyder import SimpyderConfig
 
 
 def gen_url():
-    for each_id in range(100):
-        yield "https://www.bilibili.com/video/av{}".format(each_id)
+  for each_id in range(100):
+    yield "https://www.bilibili.com/video/av{}".format(each_id)
 
 
 def parse(response):
-    return response.xpath('//meta[@name="title"]/@content')[0]
+  return response.xpath('//meta[@name="title"]/@content')[0]
 
 
 def save(item):
-    print(item)
-    pass
+  print(item)
+  pass
 
 
 s1 = Spider(gen_url, parse, save, name="DEMO")
