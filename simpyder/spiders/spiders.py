@@ -20,7 +20,7 @@ class Spider():
     yield None
 
   def get_response(self, url):
-    response = requests.get(url, headers=self.headers)
+    response = self.get(url)
     if 'html' in response.headers['content-type']:
       response.xpath = HTML(response.text).xpath
     return response
@@ -72,9 +72,11 @@ class Spider():
           "使用User-Agent：{}...".format(self.config.USER_AGENT[:30]))
     self.logger.critical("使用COOKIE：{}".format(self.config.COOKIE))
     self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
-
+  def get(self, url):
+    return requests.get(url, headers=self.headers)
   def __init__(self, name="Simpyder", gen_url=None, parse=None, save=None, config=SimpyderConfig()):
     self.config = config
+    
     self.logger = _get_logger("{} - 主线程".format(name), self.config.LOG_LEVEL)
     self.assemble(gen_url, parse, save)
 
