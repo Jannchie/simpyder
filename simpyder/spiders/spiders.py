@@ -209,7 +209,9 @@ class Spider():
           try:
             item = self.parse(response)
           except Exception as e:
+            # 如果解析失败
             self.logger.exception(e)
+            continue
           self.item_queue.put(item)
           datetime.timedelta(1)
         except NotImplementedError as e:
