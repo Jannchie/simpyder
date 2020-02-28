@@ -26,7 +26,7 @@ class Spider():
       response.xpath = HTML(response.text).xpath
     return response
 
-  def parse(response):
+  def parse(self, response):
     self.logger.critical('未实现方法: parse(response)，将直接返回Response对象')
     return response
 
@@ -82,7 +82,7 @@ class Spider():
     self.session = requests.session()
     self.session.mount('http://', HTTPAdapter(max_retries=3))
     self.session.mount('https://', HTTPAdapter(max_retries=3))
-    
+
     # 载入配置
     self.config = config
 
@@ -122,7 +122,7 @@ class Spider():
 
   def run(self):
     print("""
-       _____ _                           __         
+       _____ _  Author: Jannchie         __         
       / ___/(_)___ ___  ____  __  ______/ /__  _____
       \__ \/ / __ `__ \/ __ \/ / / / __  / _ \/ ___/
      ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /    
@@ -206,13 +206,14 @@ class Spider():
           self.logger.debug("开始爬取 {}".format(url))
 
           response = self.get_response(url)
-          item = self.parse(response)
-
+          try:
+            item = self.parse(response)
+          except Exception as e:
+            self.logger.exception(e)
           self.item_queue.put(item)
-
           datetime.timedelta(1)
         except NotImplementedError as e:
-          self.logger.error(e)
+          self.logger.exception(e)
           return
         except Exception as e:
           self.logger.exception(e)
