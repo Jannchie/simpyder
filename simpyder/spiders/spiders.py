@@ -40,7 +40,10 @@ class Spider():
         "{} - 子线程 - SAVE".format(self.name), self.config.LOG_LEVEL)
     while True:
       if not self.item_queue.empty():
-        item = self.save(self.item_queue.get())
+        try:
+          item = self.save(self.item_queue.get())
+        except Exception as e:
+          self.logger.exception(e)
         logger.debug(item)
         self.meta['item_count'] += 1
       else:
