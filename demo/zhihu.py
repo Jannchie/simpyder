@@ -8,6 +8,13 @@ import simpyder
 import re
 import datetime
 
+from pymongo import MongoClient
+import os
+env_dist = os.environ
+# 存入mongodb
+client = MongoClient(env_dist.get("BILIOB_MONGO_URL"))
+db = client.zhihu
+
 # 该网站的爬取需要伪造cookies，请填入自己的cookie
 cookie = ''
 

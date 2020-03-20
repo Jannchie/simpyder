@@ -8,6 +8,7 @@ from requests.adapters import HTTPAdapter
 from lxml.etree import HTML
 import datetime
 
+import socket
 from simpyder.config import SimpyderConfig
 
 from simpyder.utils import _get_logger
@@ -41,7 +42,10 @@ class Spider():
     while True:
       if not self.item_queue.empty():
         try:
-          item = self.save(self.item_queue.get())
+          item = self.item_queue.get()
+          if item == None or item == False:
+            continue
+          item = self.save(item)
         except Exception as e:
           self.logger.exception(e)
         logger.debug(item)
@@ -112,18 +116,35 @@ class Spider():
       c_time = datetime.datetime.now()
       history.append(
           (c_time, self.meta['link_count'], self.meta['item_count']))
-      if len(history) > 60 / interval:
-        history = history[-12:]
+      if len(history) > 60:
+        history = history[-60:]
       if (c_time - self.meta['start_time']).total_seconds() % interval < 1 and len(history) > 1:
-        delta_link = (history[-1][1] - history[0][1]) * 60 / \
-            (history[-1][0] - history[0][0]).total_seconds()
-        delta_item = (history[-1][2] - history[0][2]) * 60 / \
-            (history[-1][0] - history[0][0]).total_seconds()
+        delta_link = (history[-interval + 1][1] - history[0][1]) * 60 / \
+            (history[-interval + 1][0] - history[0][0]).total_seconds()
+        delta_item = (history[-interval + 1][2] - history[0][2]) * 60 / \
+            (history[-interval + 1][0] - history[0][0]).total_seconds()
+        if (self.config.DOWNLOAD_INTERVAL == 0):
+          load = 100
+        else:
+          load = int((history[-1][1] - history[0][1]) * 60 /
+                     (history[-1][0] - history[0][0]).total_seconds() /
+                     (60 / (self.config.DOWNLOAD_INTERVAL / self.config.PARSE_THREAD_NUMER)) * 100)
+        result = {
+            'computer_name': socket.gethostname(),
+            'spider_name': self.start_time,
+            'start_time': self.start_time,
+            'update_time': datetime.datetime.now(),
+            'load': load,
+            'delta_link': delta_link,
+            'delta_item': delta_item
+        },
         log.info(
-            "正在爬取第 {} 个链接({}/min),共产生 {} 个对象({}/min)".format(self.meta['link_count'], int(delta_link), self.meta['item_count'], int(delta_item)))
+            "正在爬取第 {} 个链接({}/min, 负载{}%),共产生 {} 个对象({}/min)".format(self.meta['link_count'], int(delta_link), load,  self.meta['item_count'], int(delta_item)))
       sleep(1)
 
   def run(self):
+    self.start_time = datetime.datetime.now()
+
     print("""
        _____ _  Author: Jannchie         __         
       / ___/(_)___ ___  ____  __  ______/ /__  _____
@@ -138,9 +159,11 @@ class Spider():
 
     self.logger.critical("Simpyder ver.{}".format(__VERSION__))
     self.logger.critical("启动爬虫任务")
-    meta = {'link_count': 0, 'item_count': 0}
-    start_time = datetime.datetime.now()
-    meta['start_time'] = start_time
+    meta = {'link_count': 0,
+            'item_count': 0,
+            'thread_number': self.config.PARSE_THREAD_NUMER,
+            'download_interval': self.config.DOWNLOAD_INTERVAL}
+    meta['start_time'] = self.start_time
     self.meta = meta
     info_thread = threading.Thread(target=self.__get_info, name="状态打印线程")
     info_thread.setDaemon(True)
@@ -195,6 +218,7 @@ class Spider():
     def run(self):
       while True:
         try:
+          sleep(self.meta['download_interval'])
           self.queueLock.acquire()
           if not self.url_queue.empty():
             url = self.url_queue.get()
@@ -207,7 +231,6 @@ class Spider():
             sleep(1)
             continue
           self.logger.debug("开始爬取 {}".format(url))
-
           response = self.get_response(url)
           try:
             item = self.parse(response)
