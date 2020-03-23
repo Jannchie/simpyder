@@ -23,8 +23,6 @@ class Spider():
 
   def get_response(self, url):
     response = self.get(url)
-    if 'html' in response.headers['content-type']:
-      response.xpath = HTML(response.text).xpath
     return response
 
   def parse(self, response):
@@ -43,6 +41,7 @@ class Spider():
       if not self.item_queue.empty():
         try:
           item = self.item_queue.get()
+          self._saving = True
           if item == None or item == False:
             continue
           item = self.save(item)
@@ -51,7 +50,8 @@ class Spider():
         logger.debug(item)
         self.meta['item_count'] += 1
       else:
-        sleep(0.1)
+        self._saving = False
+        sleep(1)
 
   def assemble(self, gen_url=None, parse=None, save=None, config: SimpyderConfig = SimpyderConfig()):
     if gen_url != None:
@@ -82,7 +82,10 @@ class Spider():
     self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
 
   def get(self, url):
-    return self.session.get(url, headers=self.headers)
+    response = self.session.get(url, headers=self.headers)
+    if 'html' in response.headers['content-type']:
+      response.xpath = HTML(response.text).xpath
+    return response
 
   def __init__(self, name="Simpyder", gen_url=None, parse=None, save=None, config=SimpyderConfig()):
     # 配置Session，复用TCP连接
@@ -106,6 +109,7 @@ class Spider():
     self.queueLock = threading.Lock()
     self.threads = []
     self.name = name
+    self._saving = False
 
   def __get_info(self):
     log = _get_logger("{} - 子线程 - INFO".format(self.name),
@@ -120,9 +124,9 @@ class Spider():
         history = history[-60:]
       if (c_time - self.meta['start_time']).total_seconds() % interval < 1 and len(history) > 1:
         delta_link = (history[-interval + 1][1] - history[0][1]) * 60 / \
-            (history[-interval + 1][0] - history[0][0]).total_seconds()
+            ((history[-interval + 1][0] - history[0][0]).total_seconds() + 1)
         delta_item = (history[-interval + 1][2] - history[0][2]) * 60 / \
-            (history[-interval + 1][0] - history[0][0]).total_seconds()
+            ((history[-interval + 1][0] - history[0][0]).total_seconds() + 1)
         if (self.config.DOWNLOAD_INTERVAL == 0):
           load = 100
         else:
@@ -187,7 +191,7 @@ class Spider():
         self.url_queue.put(each_url)
         # self.queueLock.release()
 
-    while self.url_queue.empty() == False:
+    while self.url_queue.empty() == False or self.item_queue.empty() == False or self._saving == True:
       if self.except_queue.empty() == False:
         except_info = self.except_queue.get()
         self.logger = _get_logger(self.name, self.config.LOG_LEVEL)
@@ -196,7 +200,7 @@ class Spider():
         #     each_thread.join()
         break
       pass
-      sleep(1)
+      sleep(0.1)
     self.logger.critical("爬取完毕")
     self.logger.critical("合计爬取项目数：{}".format(meta["item_count"]))
     self.logger.critical("合计爬取链接数：{}".format(meta["link_count"]))
