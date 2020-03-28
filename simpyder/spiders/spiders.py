@@ -102,7 +102,7 @@ class Spider():
     # 构造函数组装
     self.assemble(gen_url, parse, save)
 
-    self.QUEUE_LEN = 1000
+    self.QUEUE_LEN = self.config.PARSE_THREAD_NUMER * 2
     self.url_queue = queue.Queue(self.QUEUE_LEN)
     self.item_queue = queue.Queue(self.QUEUE_LEN)
     self.except_queue = queue.Queue(1)
