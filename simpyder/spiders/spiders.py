@@ -37,18 +37,22 @@ class Spider():
   def __run_save(self):
     logger = _get_logger(
         "{} - 子线程 - SAVE".format(self.name), self.config.LOG_LEVEL)
+    count = 0
     while True:
       if not self.item_queue.empty():
+        count = 0
+        self._saving = True
         try:
           item = self.item_queue.get()
-          self._saving = True
           if item == None or item == False:
             continue
+          logger.debug(item)
           item = self.save(item)
+          self.meta['item_count'] += 1
+          if self._finish == True:
+            return
         except Exception as e:
           self.logger.exception(e)
-        logger.debug(item)
-        self.meta['item_count'] += 1
       else:
         self._saving = False
         sleep(1)
@@ -109,7 +113,7 @@ class Spider():
     self.queueLock = threading.Lock()
     self.threads = []
     self.name = name
-    self._saving = False
+    self._saving = True
 
   def __get_info(self):
     log = _get_logger("{} - 子线程 - INFO".format(self.name),
@@ -148,7 +152,7 @@ class Spider():
 
   def run(self):
     self.start_time = datetime.datetime.now()
-
+    self._finish = False
     print("""
        _____ _  Author: Jannchie         __         
       / ___/(_)___ ___  ____  __  ______/ /__  _____
@@ -177,7 +181,7 @@ class Spider():
     save_thread.start()
     for i in range(self.PARSE_THREAD_NUMER):
       self.threads.append(self.ParseThread('{} - 子线程 - No.{}'.format(self.name, i), self.url_queue, self.queueLock,
-                                           self.get_response, self.parse, self.save, self.except_queue, self.item_queue, meta))
+                                           self.get_response, self.parse, self.save, self.except_queue, self.item_queue, meta, self.config))
     for each_thread in self.threads:
       each_thread.setDaemon(True)
       each_thread.start()
@@ -188,9 +192,10 @@ class Spider():
         # self.queueLock.release()
         sleep(0.1)
       else:
+        self.logger.debug("加入待爬: {}".format(each_url))
         self.url_queue.put(each_url)
         # self.queueLock.release()
-
+    self.logger.info("全部请求完毕，等待解析进程")
     while self.url_queue.empty() == False or self.item_queue.empty() == False or self._saving == True:
       if self.except_queue.empty() == False:
         except_info = self.except_queue.get()
@@ -200,13 +205,14 @@ class Spider():
         #     each_thread.join()
         break
       pass
-      sleep(0.1)
-    self.logger.critical("爬取完毕")
+    self.logger.critical("全部解析完毕,等待保存进程")
+    self._finish = True
+    save_thread.join()
     self.logger.critical("合计爬取项目数：{}".format(meta["item_count"]))
     self.logger.critical("合计爬取链接数：{}".format(meta["link_count"]))
 
   class ParseThread(threading.Thread):
-    def __init__(self, name, url_queue, queueLock, get_response, parse, save, except_queue, item_queue, meta):
+    def __init__(self, name, url_queue, queueLock, get_response, parse, save, except_queue, item_queue, meta, config):
       threading.Thread.__init__(self, target=self.run)
       self.name = name
       self.url_queue = url_queue
@@ -216,7 +222,7 @@ class Spider():
       self.save = save
       self.item_queue = item_queue
       self.except_queue = except_queue
-      self.logger = _get_logger(self.name)
+      self.logger = _get_logger(self.name, config.LOG_LEVEL)
       self.meta = meta
 
     def run(self):
