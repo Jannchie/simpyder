@@ -187,14 +187,20 @@ class Spider():
       each_thread.start()
     url_gener = self.gen_url()
     for each_url in url_gener:
-      # self.queueLock.acquire()
-      if (self.url_queue.full()):
-        # self.queueLock.release()
+      self.queueLock.acquire()
+      while (self.url_queue.full()):
+        if self.queueLock.locked():
+          self.logger.debug("队列满: {}".format(each_url))
+          self.queueLock.release()
         sleep(0.1)
-      else:
-        self.logger.debug("加入待爬: {}".format(each_url))
-        self.url_queue.put(each_url)
-        # self.queueLock.release()
+      self.logger.debug("加入待爬: {}".format(each_url))
+      if self.queueLock.locked():
+        self.queueLock.release()
+
+      self.queueLock.acquire()
+      self.url_queue.put(each_url)
+      self.queueLock.release()
+
     self.logger.info("全部请求完毕，等待解析进程")
     while self.url_queue.empty() == False or self.item_queue.empty() == False or self._saving == True:
       if self.except_queue.empty() == False:
