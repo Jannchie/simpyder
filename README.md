@@ -1,11 +1,11 @@
-# Simpyder - **Si**mple **M**ultithreaded **Py**thon Spi**der**
+# Simpyder - Simple Python Spider
 
-Simpyder - 轻量级多线程Python爬虫
+Simpyder - 轻量级**协程**Python爬虫
 
 ## 特点
 
-- 轻量级：下载便利，使用简单。
-- 多线程：并行下载解析，快速获取数据。
+- 轻量级：下载便利，依赖较少，使用简单。
+- 协程：单线程，通过协程实现并发。
 - 可定制：简单配置，适应各种爬取场合。
   
 ## 快速开始
@@ -42,8 +42,10 @@ def gen_url():
 
 该函数需要返回一个对象，作为处理结果。
 
+注意，与普通函数不同，这是一个协程函数。需要在前面加上`async`。代表该函数是异步的。
+
 ``` python
-def parse(response):
+async def parse(response):
     return response.xpath('//meta[@name="title"]/@content')[0]
 ```
 
@@ -51,8 +53,10 @@ def parse(response):
 
 上面函数的处理结果将在这个函数中统一被导出。下列例子为直接在控制台中打印导出结果。
 
+保存需要IO操作，因此这个函数可能运行较慢，因此也需要是异步的。我们在前面添加`async`关键词
+
 ``` python
-def save(item):
+async def save(item):
     print(item)
 ```
 
@@ -61,21 +65,16 @@ def save(item):
 首先导入爬虫对象:
 
 ``` python
-import Spider from simpyder
+import AsynSpider from simpyder.spiders
 ```
 
-你可以使用构造函数组装Spider
+你可以这样组装Spider
 
 ``` python
-s = Spider(gen_url, parse, save, name="DEMO") # 构造函数方式组装
-```
-
-也可以使用`assemble`函数进行组装
-
-``` python
-
-s = Spider()
-s.assemble(gen_url, parse, save, name="DEMO") # 先创建爬虫对象，再装载各个模块
+spider = AsyncSpider()
+spider.gen_url = gen_url
+spider.parse = parse
+spider.save = save
 ```
 
 ### 接着就可以开始爬虫任务
@@ -84,14 +83,11 @@ s.assemble(gen_url, parse, save, name="DEMO") # 先创建爬虫对象，再装�
 s.run()
 ```
 
-### 你也可以配置进行一些简单的配置
+### 你也可以通过构造函数进行一些配置
 
 ``` python
-from simpyder import SimpyderConfig
-sc = SimpyderConfig
-sc.COOKIES = "example:value"
-sc.USER_AGENT = "my user agent"
-s.assemble(gen_url=gen_url, parse=parse, save=save, name="DEMO",config=sc)
+
+spider = AsyncSpider(name="TEST")
 ```
 
 ## 示例程序

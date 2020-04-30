@@ -54,7 +54,7 @@ class AsynSpider():
 
   def run(self):
     self.headers = {
-        'user_agent': self.user_agent
+        'user-agent': self.user_agent
     }
     self.logger = _get_logger("{}".format("simpyder"), "INFO")
     print("""\033[0;32m
