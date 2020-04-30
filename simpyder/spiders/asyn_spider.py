@@ -56,7 +56,7 @@ class AsynSpider():
     self.headers = {
         'user-agent': self.user_agent
     }
-    self.logger = _get_logger("{}".format("simpyder"), "INFO")
+    self.logger = _get_logger("{}".format(self.name), "INFO")
     print("""\033[0;32m
    _____ _  Author: Jannchie         __
   / ___/(_)___ ___  ____  __  ______/ /__  _____
@@ -67,7 +67,9 @@ class AsynSpider():
     self.logger.critical("user_agent: %s" % self.user_agent)
     self.logger.critical("concurrency: %s" % self.concurrency)
     self.logger.critical("interval: %s" % self.interval)
-    asyncio.run(self._run())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(self._run())
+    loop.close()
 
   def _print_log(self):
 
