@@ -4,7 +4,7 @@ from os.path import dirname, join
 from simpyder.__version__ import __VERSION__
 print(find_packages())
 with open('./README.md', 'r', encoding="utf-8") as fh:
-    long_description = fh.read()
+  long_description = fh.read()
 setup(
     name='simpyder',
     version=__VERSION__,
@@ -27,7 +27,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.4',
+    python_requires='>=3.6',
     install_requires=[
         'requests==2.22.0',
         'lxml==4.3.4',
