@@ -67,9 +67,9 @@ class AsynSpider():
     self.logger.critical("user_agent: %s" % self.user_agent)
     self.logger.critical("concurrency: %s" % self.concurrency)
     self.logger.critical("interval: %s" % self.interval)
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(self._run())
-    loop.close()
+    self.loop = asyncio.get_event_loop()
+    self.loop.run_until_complete(self._run())
+    self.loop.close()
 
   def _print_log(self):
 
@@ -111,11 +111,11 @@ class AsynSpider():
     start_time = datetime.datetime.now()
     url_gener = self.gen_url()
     tasks = []
-    asyncio.create_task(self._auto_print_log())
+    self.loop.create_task(self._auto_print_log())
     # 并发队列
     url_queue = queue.Queue(self.concurrency)
     for url in url_gener:
-      url_queue.put(asyncio.create_task(self.crawl_one_url(url)))
+      url_queue.put(self.loop.create_task(self.crawl_one_url(url)))
       # 队列满则并发发起请求
       if url_queue.full():
         while False == url_queue.empty():
