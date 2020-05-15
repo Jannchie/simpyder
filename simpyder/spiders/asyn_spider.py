@@ -14,11 +14,10 @@ from simpyder.config import SimpyderConfig
 
 from simpyder.utils import _get_logger
 from simpyder.__version__ import __VERSION__
-from simpyder.ip_proxy import get_random_proxies
 
 
 class AsynSpider():
-  async def get(self, url, proxy=self.proxy):
+  async def get(self, url, proxy=None):
     for i in range(3):
       try:
         self.proxy = proxy
