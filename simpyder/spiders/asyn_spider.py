@@ -8,20 +8,27 @@ import requests
 from requests.adapters import HTTPAdapter
 from lxml.etree import HTML
 import datetime
-
+import aiohttp
 import socket
 from simpyder.config import SimpyderConfig
 
 from simpyder.utils import _get_logger
 from simpyder.__version__ import __VERSION__
+from simpyder.ip_proxy import get_random_proxies
 
 
 class AsynSpider():
-  async def get(self, url):
-    response = self.session.get(url, headers=self.headers)
-    if 'html' in response.headers['content-type']:
-      response.xpath = HTML(response.text).xpath
-    return response
+  async def get(self, url, proxy=self.proxy):
+    for i in range(3):
+      try:
+        self.proxy = proxy
+        response = await self.session.get(
+            url, headers=self.headers, proxy=self.proxy)
+        if 'content-type' in response.headers and 'html' in response.headers['content-type']:
+          response.xpath = HTML(response.text).xpath
+      except Exception:
+        continue
+      return response
 
   def gen_url(self):
     self.except_queue.put('未实现方法: gen_url()，无法开启爬虫任务。')
@@ -38,7 +45,7 @@ class AsynSpider():
 
   def __init__(self, name="Simpyder", user_agent="Simpyder ver.{}".format(__VERSION__), interval=0, concurrency=8):
     self.log_interval = 5
-
+    self.proxy = None
     self.name = name
     self.user_agent = user_agent
     self.concurrency = concurrency
@@ -47,10 +54,10 @@ class AsynSpider():
     self._url_count = 0
     self._item_count = 0
     self._statistic = []
-
-    self.session = requests.session()
-    self.session.mount('http://', HTTPAdapter(max_retries=3))
-    self.session.mount('https://', HTTPAdapter(max_retries=3))
+    self.session = aiohttp.ClientSession()
+    # self.session = requests.session()
+    # self.session.mount('http://', HTTPAdapter(max_retries=3))
+    # self.session.mount('https://', HTTPAdapter(max_retries=3))
 
   def run(self):
     self.headers = {
@@ -120,10 +127,10 @@ class AsynSpider():
       if url_queue.full():
         while False == url_queue.empty():
           await asyncio.sleep(self.interval)
-          await url_queue.get()
+          url_queue.get()
     while False == url_queue.empty():
       await asyncio.sleep(self.interval)
-      await url_queue.get()
+      url_queue.get()
     self._print_log()
     self.logger.critical("Simpyder任务执行完毕")
     end_time = datetime.datetime.now()
@@ -131,7 +138,10 @@ class AsynSpider():
     self.logger.critical('累计消耗时间：% s' % str(delta_time))
 
   async def crawl_one_url(self, url):
-    res = await self.get(url)
+    if type(url) == str and url[0:4] == 'http':
+      res = await self.get(url)
+    else:
+      res = url
     self._url_count += 1
     item = await self.parse(res)
     count = await self.save(item)
