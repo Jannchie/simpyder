@@ -92,7 +92,58 @@ spider = AsyncSpider(name="TEST")
 
 ## 示例程序
 
-参见[B站视频标题爬虫](./demo/demo.py)
+``` python
+from simpyder.spiders import AsynSpider
+
+# new一个异步爬虫
+s = AsynSpider()
+
+# 定义链接生成的生成器，这里是爬取800次百度首页的爬虫
+def g():
+  count = 0
+  while count < 800:
+    count += 1
+    yield "https://www.baidu.com"
+
+# 绑定生成器
+s.gen_url = g
+
+# 定义用于解析的异步函数，这里不进行任何操作，返回一段文本
+async def p(res):
+  return "parsed item"
+
+# 绑定解析器
+s.parse = p
+
+# 定义用于存储的异步函数，这里不进行任何操作，但是返回2，表示解析出2个对象
+async def s(item):
+  return 2
+
+# 绑定存储器
+s.save = s
+
+# 运行
+s.run()
+
+```
+
+## 理论速率
+
+运行上述代码，可以得到单线程、并发数：8、仅进行计数操作的下载速率：
+
+``` log
+[2020-05-18 16:56:23,271][CRITICAL] @ Simpyder: user_agent: Simpyder ver.0.1.6
+[2020-05-18 16:56:23,401][CRITICAL] @ Simpyder: concurrency: 8
+[2020-05-18 16:56:23,545][CRITICAL] @ Simpyder: interval: 0
+[2020-05-18 16:56:23,620][INFO] @ Simpyder: 已经爬取0个链接(0/min)，共产生0个对象(0/min)
+[2020-05-18 16:56:28,625][INFO] @ Simpyder: 已经爬取217个链接(2604/min)，共产生434个对象(5208/min)
+[2020-05-18 16:56:33,621][INFO] @ Simpyder: 已经爬取458个链接(2748/min)，共产生916个对象(5496/min)
+[2020-05-18 16:56:38,635][INFO] @ Simpyder: 已经爬取688个链接(2752/min)，共产生1376个对象(5504/min)
+[2020-05-18 16:56:41,957][CRITICAL] @ Simpyder: Simpyder任务执行完毕
+[2020-05-18 16:56:41,958][CRITICAL] @ Simpyder: 累计消耗时间：0:00:18.339952
+[2020-05-18 16:56:41,958][CRITICAL] @ Simpyder: 累计爬取链接：800
+[2020-05-18 16:56:41,959][CRITICAL] @ Simpyder: 累计生成对象：1600
+```
 
 ---
 

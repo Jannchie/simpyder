@@ -206,8 +206,6 @@ if __name__ == "__main__":
   def g():
     count = 0
     while count < 800:
-      if count % 100 == 0:
-        sleep(0.001)
       count += 1
       yield "https://www.baidu.com"
   s.gen_url = g
