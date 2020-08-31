@@ -152,13 +152,14 @@ class AsynSpider():
     self.logger.info(f"Start Crawler: {i}")
     while self.finished == False and not self.url_task_queue.empty():
       try:
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(self.interval)
         if not self.url_task_queue.empty():
           url = await self.url_task_queue.get()
+          # self.logger.info(i)
           await self.crawl_one_url(url, next(self.proxy_gener))
           url = self.url_task_queue.task_done()
         else:
-          await asyncio.sleep(0.01)
+          await asyncio.sleep(0)
       except Exception as e:
         self.logger.exception(e)
     pass
@@ -168,7 +169,7 @@ class AsynSpider():
     for url in url_gener:
       self.logger.debug(f"Crawl Url: {url}")
       await self.url_task_queue.put(url)
-      await asyncio.sleep(0.01)
+      await asyncio.sleep(0)
 
   async def _run(self):
     self.logger.debug("Spider Task Start")
@@ -202,6 +203,7 @@ class AsynSpider():
 
 if __name__ == "__main__":
   s = AsynSpider()
+  s.concurrency = 16
 
   def g():
     count = 0
