@@ -23,29 +23,43 @@ class AsynSpider():
     while True:
       yield ""
 
+  async def __update_proxy(self):
+    if len(self.succeed_proxies) != 0:
+      self.proxy = next(iter(self.succeed_proxies))
+    else:
+      self.proxy = await self.proxy_gener.__anext__()
+
   async def get(self, url, proxy=None, retry=5):
-    # 重试次数
+    response = None
     if proxy != '':
       proxy = self.proxy
+    # 重试次数
     for i in range(retry):
       try:
         response = await self.session.get(
             url, headers=self.headers, proxy=proxy, timeout=5)
-        if response.status != 200 or self.except_content_type != None and response.content_type != self.except_content_type:
-          if proxy != '':
-            self.proxy = await self.proxy_gener.__anext__()
-            proxy = self.proxy
-          continue
         if 'content-type' in response.headers and 'html' in response.content_type:
           response.xpath = HTML(await response.text()).xpath
         if response.content_type == 'application/json':
           response.json_data = await response.json()
-      except (Exception, BaseException, TimeoutError):
+        if response.status != 200 or self.except_content_type != None and response.content_type != self.except_content_type:
+          if proxy != '':
+            await self.__update_proxy()
+            proxy = self.proxy
+          continue
+        break
+      except (Exception, BaseException, TimeoutError) as e:
         if proxy != '':
-          self.proxy = await self.proxy_gener.__anext__()
+          await self.__update_proxy()
           proxy = self.proxy
         continue
-      return response
+      break
+    if response != None and response.status == 200:
+      self.succeed_proxies.add(proxy)
+    else:
+      self.succeed_proxies.discard(self.proxy)
+      await self.__update_proxy()
+    return response
 
   async def gen_url(self):
     self.except_queue.put('未实现方法: gen_url()，无法开启爬虫任务。')
@@ -64,6 +78,7 @@ class AsynSpider():
     self.finished = False
     self.log_interval = 5
     self.name = name
+    self.succeed_proxies = set()
     self.retry = 5
     self.user_agent = user_agent
     self.concurrency = concurrency
@@ -183,7 +198,7 @@ class AsynSpider():
 
     self.proxy = await self.proxy_gener.__anext__()
 
-    self.url_task_queue = Queue(4)
+    self.url_task_queue = Queue(30)
 
     start_time = datetime.datetime.now()
     tasks = []
