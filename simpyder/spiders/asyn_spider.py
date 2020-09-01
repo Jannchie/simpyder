@@ -19,30 +19,35 @@ from simpyder.__version__ import __VERSION__
 
 
 class AsynSpider():
-  def gen_proxy(self):
+  async def gen_proxy(self):
     while True:
       yield ""
 
-  async def get(self, url, proxy=None):
+  async def get(self, url, proxy=None, retry=5):
     # 重试次数
-    self.proxy = proxy
-    for i in range(8):
+    if proxy != '':
+      proxy = self.proxy
+    for i in range(retry):
       try:
         response = await self.session.get(
-            url, headers=self.headers, proxy=self.proxy, timeout=5)
+            url, headers=self.headers, proxy=proxy, timeout=5)
         if response.status != 200 or self.except_content_type != None and response.content_type != self.except_content_type:
-          self.proxy = next(self.proxy_gener)
+          if proxy != '':
+            self.proxy = await self.proxy_gener.__anext__()
+            proxy = self.proxy
           continue
         if 'content-type' in response.headers and 'html' in response.content_type:
           response.xpath = HTML(await response.text()).xpath
         if response.content_type == 'application/json':
           response.json_data = await response.json()
       except (Exception, BaseException, TimeoutError):
-        self.proxy = next(self.proxy_gener)
+        if proxy != '':
+          self.proxy = await self.proxy_gener.__anext__()
+          proxy = self.proxy
         continue
       return response
 
-  def gen_url(self):
+  async def gen_url(self):
     self.except_queue.put('未实现方法: gen_url()，无法开启爬虫任务。')
     yield None
 
@@ -58,8 +63,8 @@ class AsynSpider():
   def __init__(self, name="Simpyder", user_agent="Simpyder ver.{}".format(__VERSION__), interval=0, concurrency=8, log_level='INFO'):
     self.finished = False
     self.log_interval = 5
-    self.proxy = None
     self.name = name
+    self.retry = 5
     self.user_agent = user_agent
     self.concurrency = concurrency
     self.interval = interval
@@ -68,14 +73,15 @@ class AsynSpider():
     self._item_count = 0
     self._statistic = []
     self.except_content_type = None
-    # self.session = requests.session()
-    # self.session.mount('http://', HTTPAdapter(max_retries=3))
-    # self.session.mount('https://', HTTPAdapter(max_retries=3))
-
-  def run(self):
     self.headers = {
         'user-agent': self.user_agent
     }
+    # self.session = requests.session()
+    # self.session.mount('http://', HTTPAdapter(max_retries=3))
+    # self.session.mount('https://', HTTPAdapter(max_retries=3))
+    self.session = aiohttp.ClientSession()
+
+  def run(self):
     self.logger = _get_logger("{}".format(self.name), self.log_level)
     print("""\033[0;32m
    _____ _  Author: Jannchie         __
@@ -149,31 +155,35 @@ class AsynSpider():
       self.logger.exception(e)
 
   async def _run_crawler(self, i):
-    self.logger.info(f"Start Crawler: {i}")
-    while self.finished == False and not self.url_task_queue.empty():
-      try:
-        await asyncio.sleep(self.interval)
-        if not self.url_task_queue.empty():
-          url = await self.url_task_queue.get()
-          # self.logger.info(i)
-          await self.crawl_one_url(url, next(self.proxy_gener))
-          url = self.url_task_queue.task_done()
-        else:
-          await asyncio.sleep(0)
-      except Exception as e:
-        self.logger.exception(e)
-    pass
+    try:
+      self.logger.info(f"Start Crawler: {i}")
+      while self.finished == False or not self.url_task_queue.empty():
+        try:
+          if not self.url_task_queue.empty():
+            url = await self.url_task_queue.get()
+            self.logger.debug(i)
+            await self.crawl_one_url(url, await self.proxy_gener.__anext__())
+            url = self.url_task_queue.task_done()
+          else:
+            await asyncio.sleep(0)
+        except Exception as e:
+          self.logger.exception(e)
+    except Exception as e:
+      self.logger.exception(e)
 
   async def _add_url_to_queue(self):
     url_gener = self.gen_url()
-    for url in url_gener:
+    async for url in url_gener:
+      await asyncio.sleep(self.interval)
       self.logger.debug(f"Crawl Url: {url}")
       await self.url_task_queue.put(url)
-      await asyncio.sleep(0)
 
   async def _run(self):
     self.logger.debug("Spider Task Start")
-    self.url_task_queue = Queue(32)
+
+    self.proxy = await self.proxy_gener.__anext__()
+
+    self.url_task_queue = Queue(4)
 
     start_time = datetime.datetime.now()
     tasks = []
@@ -181,13 +191,11 @@ class AsynSpider():
     print_log = asyncio.ensure_future(self._auto_print_log())
 
     self.logger.debug("Create Crawl Tasks")
-    self.session = aiohttp.ClientSession()
     crawl_tasks = [asyncio.ensure_future(self._run_crawler(i))
                    for i in range(self.concurrency)]
-
     await self._add_url_to_queue()
     while not self.url_task_queue.empty():
-      await asyncio.sleep(1)
+      await asyncio.sleep(0)
     self.finished = True
     await asyncio.wait(crawl_tasks)
     self.logger.critical("Simpyder任务执行完毕")
@@ -203,20 +211,24 @@ class AsynSpider():
 
 if __name__ == "__main__":
   s = AsynSpider()
-  s.concurrency = 16
+  s.concurrency = 1
+  s.interval = 3
 
-  def g():
+  async def g():
     count = 0
     while count < 800:
       count += 1
+      # await asyncio.sleep(0.1)
       yield "https://www.baidu.com"
   s.gen_url = g
 
   async def parse(res):
+    await asyncio.sleep(0.1)
     return "parsed item"
   s.parse = parse
 
   async def save(item):
+    await asyncio.sleep(0.1)
     return 2
   s.save = save
   s.run()
