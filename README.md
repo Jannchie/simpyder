@@ -28,10 +28,10 @@ pip3 install simpyder --upgrade
 
 #### 链接获取
 
-我们需要一个定义一个[生成器](https://docs.python.org/zh-cn/3/c-api/gen.html)，用于产生链接。
+我们需要一个定义一个[异步生成器](https://docs.python.org/zh-cn/3/c-api/gen.html)，用于产生链接。
 
 ``` python
-def gen_url():
+async def gen_url():
     for each_id in range(100):
         yield "https://www.biliob.com/api/video/{}".format(each_id)
 ```
@@ -129,20 +129,21 @@ s.run()
 
 ## 理论速率
 
-运行上述代码，可以得到单线程、并发数：8、仅进行计数操作的下载速率：
+运行上述代码，可以得到单进程、并发数：64、仅进行计数操作的下载速率：
 
 ``` log
-[2020-05-18 16:56:23,271][CRITICAL] @ Simpyder: user_agent: Simpyder ver.0.1.6
-[2020-05-18 16:56:23,401][CRITICAL] @ Simpyder: concurrency: 8
-[2020-05-18 16:56:23,545][CRITICAL] @ Simpyder: interval: 0
-[2020-05-18 16:56:23,620][INFO] @ Simpyder: 已经爬取0个链接(0/min)，共产生0个对象(0/min)
-[2020-05-18 16:56:28,625][INFO] @ Simpyder: 已经爬取217个链接(2604/min)，共产生434个对象(5208/min)
-[2020-05-18 16:56:33,621][INFO] @ Simpyder: 已经爬取458个链接(2748/min)，共产生916个对象(5496/min)
-[2020-05-18 16:56:38,635][INFO] @ Simpyder: 已经爬取688个链接(2752/min)，共产生1376个对象(5504/min)
-[2020-05-18 16:56:41,957][CRITICAL] @ Simpyder: Simpyder任务执行完毕
-[2020-05-18 16:56:41,958][CRITICAL] @ Simpyder: 累计消耗时间：0:00:18.339952
-[2020-05-18 16:56:41,958][CRITICAL] @ Simpyder: 累计爬取链接：800
-[2020-05-18 16:56:41,959][CRITICAL] @ Simpyder: 累计生成对象：1600
+[2020-09-02 23:42:48,097][CRITICAL] @ Simpyder: user_agent: Simpyder ver.0.1.9
+[2020-09-02 23:42:48,169][CRITICAL] @ Simpyder: concurrency: 64
+[2020-09-02 23:42:48,244][CRITICAL] @ Simpyder: interval: 0
+[2020-09-02 23:42:48,313][INFO] @ Simpyder: 已经爬取0个链接(0/min)，共产生0个对象(0/min) 
+[2020-09-02 23:42:48,319][INFO] @ Simpyder: Start Crawler: 0
+[2020-09-02 23:42:53,325][INFO] @ Simpyder: 已经爬取361个链接(4332/min)，共产生658个对象(7896/min) 
+[2020-09-02 23:42:58,304][INFO] @ Simpyder: 已经爬取792个链接(5280/min)，共产生1540个对象(10266/min) 
+[2020-09-02 23:43:03,304][INFO] @ Simpyder: 已经爬取1024个链接(4388/min)，共产生2048个对象(8777/min) 
+[2020-09-02 23:43:05,007][CRITICAL] @ Simpyder: Simpyder任务执行完毕
+[2020-09-02 23:43:05,008][CRITICAL] @ Simpyder: 累计消耗时间：0:00:16.695013
+[2020-09-02 23:43:05,008][CRITICAL] @ Simpyder: 累计爬取链接：1024
+[2020-09-02 23:43:05,009][CRITICAL] @ Simpyder: 累计生成对象：2048
 ```
 
 ---
