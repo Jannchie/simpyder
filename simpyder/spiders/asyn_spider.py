@@ -37,7 +37,7 @@ class AsynSpider():
         response = await self.session.get(
             url, headers=self.headers, proxy='' if proxy == None else proxy, timeout=5)
         if 'content-type' in response.headers and 'html' in response.content_type:
-          response.xpath = HTML(await response.text()).xpathW
+          response.xpath = HTML(await response.text()).xpath
         if response.content_type == 'application/json':
           response.json_data = await response.json()
         if response.status != 200 or self.except_content_type != None and response.content_type != self.except_content_type:
@@ -153,7 +153,7 @@ class AsynSpider():
       self.logger.debug(f"> Crawl a Url: {url}")
       if type(url) == str and url[0:4] == 'http':
         self.logger.debug(f"下载数据：{url}")
-        res = await self.get(url, proxy)
+        res = await self.get(url)
         if res == None:
           self.logger.warning(f"下载数据失败 {url} {proxy}")
       else:
