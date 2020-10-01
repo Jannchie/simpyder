@@ -27,7 +27,11 @@ class AsynSpider():
     if len(self.succeed_proxies) != 0:
       self.proxy = next(iter(self.succeed_proxies))
     else:
-      self.proxy = await self.proxy_gener.__anext__()
+      try:
+        self.proxy = await self.proxy_gener.__anext__()
+      except Exception as e:
+        self.logger.warning("没有可用代理！")
+        self.proxy = ''
 
   async def get(self, url, proxy='', retry=5):
     response = None

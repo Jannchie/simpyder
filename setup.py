@@ -29,7 +29,8 @@ setup(
     ],
     python_requires='>=3.6',
     install_requires=[
-        'requests==2.22.0',
-        'lxml==4.3.4',
+        "aiohttp >= 3.6.2",
+        "requests >= 2.20.0",
+        "lxml >= 4.4.2"
     ]
 )
