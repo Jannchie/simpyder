@@ -190,7 +190,7 @@ class AsynSpider():
             self.count -= 1
             lock.release()
         else:
-          await asyncio.sleep(0)
+          await asyncio.sleep(10)
       except Exception as e:
         self.logger.exception(e)
 
@@ -209,9 +209,9 @@ class AsynSpider():
   async def _add_url_to_queue(self):
     url_gener = self.gen_url()
     async for url in url_gener:
-      await asyncio.sleep(self.interval)
       self.logger.debug(f"Crawl Url: {url}")
       await self.url_task_queue.put(url)
+      await asyncio.sleep(self.interval)
 
   async def _run(self):
     self.logger.debug("Spider Task Start")
