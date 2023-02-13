@@ -77,7 +77,7 @@ class AsynSpider():
     print(item)
     return item
 
-  def __init__(self, name="Simpyder", user_agent="Simpyder ver.{}".format(__VERSION__), interval=0, concurrency=8, log_level='INFO'):
+  def __init__(self, name="Simpyder", user_agent=f"Simpyder ver.{__VERSION__}", interval=0, concurrency=8, log_level='INFO'):
     self.count = 0
     self.finished = False
     self.log_interval = 5
@@ -102,7 +102,7 @@ class AsynSpider():
     self.session = aiohttp.ClientSession()
 
   def run(self):
-    self.logger = _get_logger("{}".format(self.name), self.log_level)
+    self.logger = _get_logger(f"{self.name}", self.log_level)
     print("""\033[0;32m
    _____ _  Author: Jannchie         __
   / ___/(_)___ ___  ____  __  ______/ /__  _____
@@ -110,9 +110,9 @@ class AsynSpider():
  ___/ / / / / / / / /_/ / /_/ / /_/ /  __/ /
 /____/_/_/ /_/ /_/ .___/\__, /\__,_/\___/_/
                 /_/    /____/  version: {}\033[0m """ .format(__VERSION__))
-    self.logger.critical("user_agent: %s" % self.user_agent)
-    self.logger.critical("concurrency: %s" % self.concurrency)
-    self.logger.critical("interval: %s" % self.interval)
+    self.logger.critical(f"user_agent: {self.user_agent}")
+    self.logger.critical(f"concurrency: {self.concurrency}")
+    self.logger.critical(f"interval: {self.interval}")
     self.proxy_gener = self.gen_proxy()
     self.loop = asyncio.get_event_loop()
     self.loop.run_until_complete(self._run())
@@ -127,23 +127,22 @@ class AsynSpider():
     if (len(self._statistic) > 10):
       self._statistic = self._statistic[1:10]
     delta_url_count = self._statistic[-1]['url_count'] - \
-        self._statistic[0]['url_count']
+          self._statistic[0]['url_count']
     delta_item_count = self._statistic[-1]['item_count'] - \
-        self._statistic[0]['item_count']
+          self._statistic[0]['item_count']
     delta_seconds = (self._statistic[-1]['time'] -
                      self._statistic[0]['time']).seconds
     url_rate = 0 if delta_seconds == 0 else delta_url_count / \
-        (delta_seconds / 60)
+          (delta_seconds / 60)
     item_rate = 0 if delta_seconds == 0 else delta_item_count / \
-        (delta_seconds / 60)
+          (delta_seconds / 60)
 
-    loading = "[限速基线：{}%]".format(
-        int(url_rate / (60 / self.interval) * 100)) if self.interval != 0 else ""
+    loading = (f"[限速基线：{int(url_rate / (60 / self.interval) * 100)}%]"
+               if self.interval != 0 else "")
 
-    self.logger.info("已经爬取{}个链接({}/min)，共产生{}个对象({}/min) {}"
-                     .format(self._url_count,
-                             int(url_rate),
-                             self._item_count, int(item_rate), loading))
+    self.logger.info(
+        f"已经爬取{self._url_count}个链接({int(url_rate)}/min)，共产生{self._item_count}个对象({int(item_rate)}/min) {loading}"
+    )
 
   async def _auto_print_log(self):
     self._last_url_count = 0
@@ -155,21 +154,18 @@ class AsynSpider():
   async def crawl_one_url(self, url, proxy):
     try:
       self.logger.debug(f"> Crawl a Url: {url}")
-      if type(url) == str and url[0:4] == 'http':
+      if type(url) == str and url[:4] == 'http':
         self.logger.debug(f"下载数据：{url}")
         res = await self.get(url)
-        if res == None:
+        if res is None:
           self.logger.warning(f"下载数据失败 {url} {proxy}")
       else:
-        self.logger.debug(f"非URL直接返回")
+        self.logger.debug("非URL直接返回")
         res = url
       self._url_count += 1
       item = await self.parse(res)
       count = await self.save(item)
-      if type(count) == int:
-        self._item_count += count
-      else:
-        self._item_count += 1
+      self._item_count += count if type(count) == int else 1
       self.logger.debug(f"√ Crawl a Url: {url}")
     except Exception as e:
       self.logger.exception(e)
@@ -252,9 +248,7 @@ if __name__ == "__main__":
   s.interval = 0
 
   async def g():
-    count = 0
-    while count < 1024:
-      count += 1
+    for _ in range(1024):
       # await asyncio.sleep(0.1)
       yield "https://www.baidu.com"
   s.gen_url = g

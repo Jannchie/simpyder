@@ -53,7 +53,6 @@ f = csv.DictWriter(open('./zhihu.csv', 'w', encoding='utf-8-sig'),
 def save(items):
   for item in items:
     f.writerow(item)
-  pass
 
 
 s = Spider()
@@ -65,4 +64,3 @@ sc.COOKIE = cookie
 sc.USER_AGENT = FAKE_UA
 s.set_config(sc)
 s.run()
-pass
