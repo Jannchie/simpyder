@@ -10,7 +10,7 @@ from simpyder import SimpyderConfig
 
 def gen_url():
   for each_id in range(100):
-    yield "https://www.bilibili.com/video/av{}".format(each_id)
+    yield f"https://www.bilibili.com/video/av{each_id}"
 
 
 def parse(response):
@@ -19,7 +19,6 @@ def parse(response):
 
 def save(item):
   print(item)
-  pass
 
 
 if __name__ == "__main__":

@@ -22,8 +22,7 @@ class Spider():
     yield None
 
   def get_response(self, url):
-    response = self.get(url)
-    return response
+    return self.get(url)
 
   def parse(self, response):
     self.logger.critical('未实现方法: parse(response)，将直接返回Response对象')
@@ -35,8 +34,7 @@ class Spider():
     return item
 
   def __run_save(self):
-    logger = _get_logger(
-        "{} - 子线程 - SAVE".format(self.name), self.config.LOG_LEVEL)
+    logger = _get_logger(f"{self.name} - 子线程 - SAVE", self.config.LOG_LEVEL)
     count = 0
     while True:
       if not self.item_queue.empty():
@@ -44,7 +42,7 @@ class Spider():
         self._saving = True
         try:
           item = self.item_queue.get()
-          if item == None or item == False:
+          if item is None or item == False:
             continue
           logger.debug(item)
           item = self.save(item)
@@ -70,20 +68,18 @@ class Spider():
     self.config = config
 
   def __apply_config(self):
-    if self.config.HEADERS == None:
+    if self.config.HEADERS is None:
       self.headers = {'cookie': self.config.COOKIE,
                       'User-Agent': self.config.USER_AGENT}
     else:
       self.headers = self.config.HEADERS
     self.PARSE_THREAD_NUMER = self.config.PARSE_THREAD_NUMER
     if (len(self.config.USER_AGENT) < 30):
-      self.logger.critical(
-          "使用User-Agent：{}".format(self.config.USER_AGENT))
+      self.logger.critical(f"使用User-Agent：{self.config.USER_AGENT}")
     else:
-      self.logger.critical(
-          "使用User-Agent：{}...".format(self.config.USER_AGENT[:30]))
-    self.logger.critical("使用COOKIE：{}".format(self.config.COOKIE))
-    self.logger.critical("线程数：{}".format(self.config.PARSE_THREAD_NUMER))
+      self.logger.critical(f"使用User-Agent：{self.config.USER_AGENT[:30]}...")
+    self.logger.critical(f"使用COOKIE：{self.config.COOKIE}")
+    self.logger.critical(f"线程数：{self.config.PARSE_THREAD_NUMER}")
 
   def get(self, url):
     response = self.session.get(url, headers=self.headers)
@@ -101,7 +97,7 @@ class Spider():
     self.config = config
 
     # 载入主线程日志记录
-    self.logger = _get_logger("{} - 主线程".format(name), self.config.LOG_LEVEL)
+    self.logger = _get_logger(f"{name} - 主线程", self.config.LOG_LEVEL)
 
     # 构造函数组装
     self.assemble(gen_url, parse, save)
@@ -116,8 +112,7 @@ class Spider():
     self._saving = True
 
   def __get_info(self):
-    log = _get_logger("{} - 子线程 - INFO".format(self.name),
-                      self.config.LOG_LEVEL)
+    log = _get_logger(f"{self.name} - 子线程 - INFO", self.config.LOG_LEVEL)
     history = []
     interval = 5
     while True:
@@ -128,9 +123,9 @@ class Spider():
         history = history[-60:]
       if (c_time - self.meta['start_time']).total_seconds() % interval < 1 and len(history) > 1:
         delta_link = (history[-interval + 1][1] - history[0][1]) * 60 / \
-            ((history[-interval + 1][0] - history[0][0]).total_seconds() + 1)
+              ((history[-interval + 1][0] - history[0][0]).total_seconds() + 1)
         delta_item = (history[-interval + 1][2] - history[0][2]) * 60 / \
-            ((history[-interval + 1][0] - history[0][0]).total_seconds() + 1)
+              ((history[-interval + 1][0] - history[0][0]).total_seconds() + 1)
         if (self.config.DOWNLOAD_INTERVAL == 0):
           load = 100
         else:
@@ -147,7 +142,8 @@ class Spider():
             'delta_item': delta_item
         },
         log.info(
-            "正在爬取第 {} 个链接({}/min, 负载{}%),共产生 {} 个对象({}/min)".format(self.meta['link_count'], int(delta_link), load,  self.meta['item_count'], int(delta_item)))
+            f"正在爬取第 {self.meta['link_count']} 个链接({int(delta_link)}/min, 负载{load}%),共产生 {self.meta['item_count']} 个对象({int(delta_item)}/min)"
+        )
       sleep(1)
 
   def run(self):
@@ -165,13 +161,15 @@ class Spider():
         """ .format(__VERSION__))
     self.__apply_config()
 
-    self.logger.critical("Simpyder ver.{}".format(__VERSION__))
+    self.logger.critical(f"Simpyder ver.{__VERSION__}")
     self.logger.critical("启动爬虫任务")
-    meta = {'link_count': 0,
-            'item_count': 0,
-            'thread_number': self.config.PARSE_THREAD_NUMER,
-            'download_interval': self.config.DOWNLOAD_INTERVAL}
-    meta['start_time'] = self.start_time
+    meta = {
+        'link_count': 0,
+        'item_count': 0,
+        'thread_number': self.config.PARSE_THREAD_NUMER,
+        'download_interval': self.config.DOWNLOAD_INTERVAL,
+        'start_time': self.start_time,
+    }
     self.meta = meta
     info_thread = threading.Thread(target=self.__get_info, name="状态打印线程")
     info_thread.setDaemon(True)
@@ -180,8 +178,19 @@ class Spider():
     save_thread.setDaemon(True)
     save_thread.start()
     for i in range(self.PARSE_THREAD_NUMER):
-      self.threads.append(self.ParseThread('{} - 子线程 - No.{}'.format(self.name, i), self.url_queue, self.queueLock,
-                                           self.get_response, self.parse, self.save, self.except_queue, self.item_queue, meta, self.config))
+      self.threads.append(
+          self.ParseThread(
+              f'{self.name} - 子线程 - No.{i}',
+              self.url_queue,
+              self.queueLock,
+              self.get_response,
+              self.parse,
+              self.save,
+              self.except_queue,
+              self.item_queue,
+              meta,
+              self.config,
+          ))
     for each_thread in self.threads:
       each_thread.setDaemon(True)
       each_thread.start()
@@ -190,10 +199,10 @@ class Spider():
       self.queueLock.acquire()
       while (self.url_queue.full()):
         if self.queueLock.locked():
-          self.logger.debug("队列满: {}".format(each_url))
+          self.logger.debug(f"队列满: {each_url}")
           self.queueLock.release()
         sleep(0.1)
-      self.logger.debug("加入待爬: {}".format(each_url))
+      self.logger.debug(f"加入待爬: {each_url}")
       if self.queueLock.locked():
         self.queueLock.release()
 
@@ -210,12 +219,11 @@ class Spider():
         # for each_thread in self.threads:
         #     each_thread.join()
         break
-      pass
     self.logger.critical("全部解析完毕,等待保存进程")
     self._finish = True
     save_thread.join()
-    self.logger.critical("合计爬取项目数：{}".format(meta["item_count"]))
-    self.logger.critical("合计爬取链接数：{}".format(meta["link_count"]))
+    self.logger.critical(f'合计爬取项目数：{meta["item_count"]}')
+    self.logger.critical(f'合计爬取链接数：{meta["link_count"]}')
 
   class ParseThread(threading.Thread):
     def __init__(self, name, url_queue, queueLock, get_response, parse, save, except_queue, item_queue, meta, config):
@@ -243,10 +251,10 @@ class Spider():
             url = None
           self.queueLock.release()
 
-          if url == None:
+          if url is None:
             sleep(1)
             continue
-          self.logger.debug("开始爬取 {}".format(url))
+          self.logger.debug(f"开始爬取 {url}")
           response = self.get_response(url)
           try:
             item = self.parse(response)
